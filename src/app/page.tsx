@@ -16,10 +16,10 @@ import {
   Coffee,
   Flame,
   HelpCircle,
-  Terminal,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
   Check,
-  Layers,
-  Sparkles,
 } from "lucide-react";
 
 export default function Home() {
@@ -27,6 +27,8 @@ export default function Home() {
   const [checkedConcepts, setCheckedConcepts] = useState<Record<string, boolean>>({});
   const [activeTab, setActiveTab] = useState<"timeline" | "cheatsheet" | "interview">("timeline");
   const [selectedPhase, setSelectedPhase] = useState<number | null>(null);
+  const [selectedWeekNumber, setSelectedWeekNumber] = useState<number>(1);
+  const [viewMode, setViewMode] = useState<"focus" | "all">("focus");
 
   // Resources modal
   const [isResourcesOpen, setIsResourcesOpen] = useState(false);
@@ -86,6 +88,19 @@ export default function Home() {
     }
   };
 
+  const handleSelectWeek = (weekNumber: number) => {
+    setSelectedWeekNumber(weekNumber);
+    if (viewMode === "all") {
+      const el = document.getElementById(`week-${weekNumber}`);
+      if (el) {
+        const offsetTop = el.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: offsetTop, behavior: "smooth" });
+      }
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   // Calculate completed concepts per week
   const completedConceptsMap: Record<number, number> = {};
   ROADMAP_WEEKS.forEach((w) => {
@@ -97,6 +112,12 @@ export default function Home() {
   const filteredWeeks = selectedPhase
     ? ROADMAP_WEEKS.filter((w) => w.phaseId === selectedPhase)
     : ROADMAP_WEEKS;
+
+  const currentTopic =
+    ROADMAP_WEEKS.find((w) => w.weekNumber === selectedWeekNumber) ||
+    ROADMAP_WEEKS[0];
+
+  const currentPhase = PHASES.find((p) => p.id === currentTopic.phaseId);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-900 flex flex-col font-sans selection:bg-[#ffd02f] selection:text-slate-900">
@@ -110,75 +131,46 @@ export default function Home() {
         onResetProgress={handleResetProgress}
       />
 
-      {/* Main Container with Left Navigation Sidebar */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 lg:px-8 py-6">
+      {/* Main Container: Two-Column Fixed Shell */}
+      <div className="flex-1 flex w-full">
+        {/* Nav Bên Trái: Luôn Cố Định, Không Bao Giờ Bị Mất Khi Cuộn */}
         {activeTab === "timeline" && (
-          <div className="flex flex-col lg:flex-row items-start gap-8">
-            {/* Nav Bên Trái: Mục Các Tuần (Sticky Left Sidebar) */}
-            <LeftNavSidebar
-              phases={PHASES}
-              weeks={ROADMAP_WEEKS}
-              completedWeeks={completedWeeks}
-              selectedPhase={selectedPhase}
-              onSelectPhase={setSelectedPhase}
-              completedConceptsMap={completedConceptsMap}
-            />
+          <LeftNavSidebar
+            phases={PHASES}
+            weeks={ROADMAP_WEEKS}
+            completedWeeks={completedWeeks}
+            selectedPhase={selectedPhase}
+            onSelectPhase={setSelectedPhase}
+            selectedWeekNumber={selectedWeekNumber}
+            onSelectWeek={handleSelectWeek}
+            completedConceptsMap={completedConceptsMap}
+            viewMode={viewMode}
+            onToggleViewMode={setViewMode}
+          />
+        )}
 
-            {/* Cột Nội Dung Chính Bên Phải */}
-            <div className="flex-1 min-w-0 space-y-6">
-              {/* Minimal Welcome Hero */}
-              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-2xs space-y-3">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-                      Lộ trình DevOps cho Java Backend
-                    </h1>
-                    <p className="text-sm text-slate-600 mt-0.5">
-                      12 tuần · khoảng 1,5–2 giờ/ngày · mục tiêu: từ <strong>“làm được”</strong> sang <strong>“hiểu vì sao”</strong> để tự tin phỏng vấn.
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      {completedWeeks.length}/12 tuần hoàn thành
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-slate-100">
-                  <div className="text-xs text-slate-600 flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-rose-600 shrink-0" />
-                    <span><strong>Cố tình làm hỏng:</strong> Hiểu sâu nằm ở debug</span>
-                  </div>
-                  <div className="text-xs text-slate-600 flex items-center gap-2">
-                    <HelpCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span><strong>Hỏi "Tại sao?":</strong> Nói thành lời không nhìn tài liệu</span>
-                  </div>
-                  <div className="text-xs text-slate-600 flex items-center gap-2">
-                    <Coffee className="w-4 h-4 text-amber-800 shrink-0" />
-                    <span><strong>Thực hành:</strong> Server riêng & Spring Boot</span>
-                  </div>
-                </div>
-              </div>
-
+        {/* Khung Nội Dung Bên Phải */}
+        <main className="flex-1 min-w-0 p-4 md:p-6 lg:p-8 overflow-y-auto">
+          {activeTab === "timeline" && (
+            <div className="max-w-4xl mx-auto space-y-6">
               {/* Mobile Quick Jump Bar */}
               <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-2">
                 <span className="text-xs font-bold text-slate-400 whitespace-nowrap mr-1">
-                  Nhảy tới:
+                  Tuần:
                 </span>
                 {ROADMAP_WEEKS.map((w) => {
                   const isDone = completedWeeks.includes(w.id);
+                  const isCurrent = selectedWeekNumber === w.weekNumber;
                   return (
                     <button
                       key={w.id}
-                      onClick={() => {
-                        const el = document.getElementById(`week-${w.weekNumber}`);
-                        if (el) el.scrollIntoView({ behavior: "smooth" });
-                      }}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold shrink-0 flex items-center justify-center ${
-                        isDone
+                      onClick={() => handleSelectWeek(w.weekNumber)}
+                      className={`w-7 h-7 rounded-lg text-xs font-bold shrink-0 flex items-center justify-center transition-all ${
+                        isCurrent
+                          ? "bg-slate-900 text-white shadow-xs"
+                          : isDone
                           ? "bg-emerald-600 text-white"
-                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          : "bg-slate-200 text-slate-700 hover:bg-slate-300"
                       }`}
                     >
                       {w.weekNumber}
@@ -187,44 +179,136 @@ export default function Home() {
                 })}
               </div>
 
-              {/* All 12 Week Cards with Interactive Checklist */}
-              <div className="space-y-6">
-                {filteredWeeks.map((topic) => (
+              {/* Focus Mode (Tập trung 1 tuần - Không bị kéo dài trang) */}
+              {viewMode === "focus" && (
+                <div className="space-y-6 animate-in fade-in duration-150">
+                  {/* Top Breadcrumb & Phase Summary */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-semibold text-slate-400">Lộ trình 12 Tuần</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                      <span
+                        className="font-bold flex items-center gap-1.5"
+                        style={{ color: currentPhase?.color }}
+                      >
+                        <span
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: currentPhase?.color }}
+                        />
+                        {currentPhase?.title}
+                      </span>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="font-extrabold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md">
+                        Tuần {currentTopic.weekNumber}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-500 font-medium">
+                        Tuần {selectedWeekNumber} / 12
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* The Current Selected Week Card */}
                   <WeekCard
-                    key={topic.id}
-                    topic={topic}
-                    isCompleted={completedWeeks.includes(topic.id)}
+                    key={currentTopic.id}
+                    topic={currentTopic}
+                    isCompleted={completedWeeks.includes(currentTopic.id)}
                     onToggleComplete={handleToggleComplete}
                     checkedConcepts={checkedConcepts}
                     onToggleConcept={handleToggleConcept}
                   />
-                ))}
-              </div>
+
+                  {/* Bottom Navigation: Tuần trước / Tuần kế tiếp */}
+                  <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-200">
+                    <button
+                      disabled={selectedWeekNumber <= 1}
+                      onClick={() => handleSelectWeek(selectedWeekNumber - 1)}
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                        selectedWeekNumber <= 1
+                          ? "opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200"
+                          : "bg-white text-slate-700 border-slate-200 hover:border-slate-900 hover:text-slate-900 shadow-2xs"
+                      }`}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      <span>Tuần trước ({selectedWeekNumber - 1})</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleToggleComplete(currentTopic.id)}
+                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                        completedWeeks.includes(currentTopic.id)
+                          ? "bg-emerald-50 text-emerald-700 border border-emerald-300"
+                          : "bg-slate-900 text-white hover:bg-slate-800"
+                      }`}
+                    >
+                      {completedWeeks.includes(currentTopic.id) ? (
+                        <>
+                          <Check className="w-4 h-4 text-emerald-600 stroke-[3]" />
+                          <span>Đã xong Tuần {selectedWeekNumber}</span>
+                        </>
+                      ) : (
+                        <span>Hoàn thành Tuần {selectedWeekNumber}</span>
+                      )}
+                    </button>
+
+                    <button
+                      disabled={selectedWeekNumber >= 12}
+                      onClick={() => handleSelectWeek(selectedWeekNumber + 1)}
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
+                        selectedWeekNumber >= 12
+                          ? "opacity-40 cursor-not-allowed bg-slate-100 text-slate-400 border-slate-200"
+                          : "bg-white text-slate-700 border-slate-200 hover:border-slate-900 hover:text-slate-900 shadow-2xs"
+                      }`}
+                    >
+                      <span>Tuần kế tiếp ({selectedWeekNumber + 1})</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* All Weeks Mode */}
+              {viewMode === "all" && (
+                <div className="space-y-6">
+                  {filteredWeeks.map((topic) => (
+                    <WeekCard
+                      key={topic.id}
+                      topic={topic}
+                      isCompleted={completedWeeks.includes(topic.id)}
+                      onToggleComplete={handleToggleComplete}
+                      checkedConcepts={checkedConcepts}
+                      onToggleConcept={handleToggleConcept}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Cheat Sheet Dedicated View */}
-        {activeTab === "cheatsheet" && (
-          <div className="max-w-4xl mx-auto">
-            <CheatSheetModal
-              isOpen={true}
-              onClose={() => setActiveTab("timeline")}
-            />
-          </div>
-        )}
+          {/* Cheat Sheet Dedicated View */}
+          {activeTab === "cheatsheet" && (
+            <div className="max-w-4xl mx-auto">
+              <CheatSheetModal
+                isOpen={true}
+                onClose={() => setActiveTab("timeline")}
+              />
+            </div>
+          )}
 
-        {/* Interview Q&A Dedicated View */}
-        {activeTab === "interview" && (
-          <div className="max-w-3xl mx-auto">
-            <WhyInterviewModal
-              isOpen={true}
-              initialTopic={ROADMAP_WEEKS[0]}
-              onClose={() => setActiveTab("timeline")}
-            />
-          </div>
-        )}
-      </main>
+          {/* Interview Q&A Dedicated View */}
+          {activeTab === "interview" && (
+            <div className="max-w-3xl mx-auto">
+              <WhyInterviewModal
+                isOpen={true}
+                initialTopic={ROADMAP_WEEKS[0]}
+                onClose={() => setActiveTab("timeline")}
+              />
+            </div>
+          )}
+        </main>
+      </div>
 
       {/* Global Resources Modal */}
       <ResourcesModal
