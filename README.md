@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# devops-guideline
 
-## Getting Started
+> **Lộ trình DevOps 12 tuần cho Java Backend** — Giao diện Miro Whiteboard tương tác được xây dựng với Next.js 16, Tailwind CSS và GSAP.
 
-First, run the development server:
+## 🎯 Mục tiêu
+- 12 tuần · khoảng 1,5–2 giờ/ngày.
+- Chuyển hóa tư duy từ **"làm được"** sang **"hiểu vì sao"** để tự tin phỏng vấn.
+- Phương pháp học cốt lõi: **Đọc → Tự làm → Cố tình làm hỏng → Debug → Ghi lại**.
+
+## ✨ Tính năng giao diện (Miro Design System)
+- **Miro Dot-Grid Infinite Canvas:** Bảng vẽ trực quan với phong cách Miro, thẻ Sticky Notes pastel, băng dính Washi Tape và chuột cộng tác.
+- **GSAP Animation:** Hiệu ứng nảy thẻ, nghiêng tự nhiên, hover physics và confetti chúc mừng khi hoàn thành tuần học.
+- **Lab "Cố tình làm hỏng & Debug":** Kịch bản sự cố thực chiến cho cả 12 tuần kèm lệnh debug từng bước (`jstack`, `top -H`, `docker inspect`, `kubectl describe`...).
+- **Flashcard Luyện phỏng vấn ("Tại sao?"):** Chế độ ẩn/hiện câu trả lời giúp luyện nói thành tiếng và tra cứu từ khóa phỏng vấn (Keywords checklist).
+- **Cheat Sheet Terminal:** Bảng tra cứu hơn 30+ câu lệnh Linux, JVM, Docker, Kubernetes, Helm, Terraform với chức năng 1-click copy.
+- **3 Chế độ xem linh hoạt:** Miro Board Canvas, Lộ trình tuần dọc (Timeline), và Khung giai đoạn (Kanban).
+
+## 🚀 Khởi chạy dự án
+
+Cài đặt các gói phụ thuộc và chạy môi trường dev:
 
 ```bash
+# Cài đặt thư viện
+npm install
+
+# Khởi chạy dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở trình duyệt tại: [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📦 Công nghệ sử dụng
+- **Framework:** Next.js 16 (App Router) & React 19
+- **Ngôn ngữ:** TypeScript
+- **Styling:** Tailwind CSS v4 & Lucide Icons
+- **Hiệu ứng:** GSAP (`gsap`, `@gsap/react`) & `canvas-confetti`
+- **Thiết kế:** `npx getdesign add miro` (`DESIGN.md`), UI/UX Pro Max
