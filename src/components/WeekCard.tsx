@@ -15,8 +15,6 @@ import {
   ExternalLink,
   Bug,
   Sparkles,
-  CheckSquare2,
-  Square,
 } from "lucide-react";
 import { WeekTopic } from "@/data/roadmapData";
 
@@ -57,7 +55,7 @@ export const WeekCard: React.FC<WeekCardProps> = ({
     onToggleComplete(topic.id);
   };
 
-  // Count how many concepts in this week are checked
+  // Count completed concepts
   const completedConceptsCount = topic.coreConcepts.filter(
     (_, idx) => checkedConcepts[`${topic.id}-${idx}`]
   ).length;
@@ -69,11 +67,10 @@ export const WeekCard: React.FC<WeekCardProps> = ({
     const willBeChecked = !checkedConcepts[key];
     onToggleConcept(key, topic.id);
 
-    // If checking this item completes all concepts in this week
     if (willBeChecked && completedConceptsCount + 1 === totalConcepts && !isCompleted) {
       confetti({
-        particleCount: 30,
-        spread: 50,
+        particleCount: 35,
+        spread: 55,
         origin: { y: 0.8 },
         colors: ["#00b473", "#ffd02f"],
       });
@@ -153,7 +150,7 @@ export const WeekCard: React.FC<WeekCardProps> = ({
 
       {/* Card Body */}
       <div className="p-5 md:p-6 space-y-6 bg-white">
-        {/* Core Learning Topics (Interactive Checklist) */}
+        {/* Core Learning Topics (Interactive Checklist with Detailed Descriptions) */}
         <div>
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
@@ -161,12 +158,12 @@ export const WeekCard: React.FC<WeekCardProps> = ({
             </h3>
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
-                {completedConceptsCount}/{totalConcepts} đã nắm vững
+                {completedConceptsCount}/{totalConcepts} mục đã nắm vững
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+          <div className="space-y-3">
             {topic.coreConcepts.map((concept, idx) => {
               const conceptKey = `${topic.id}-${idx}`;
               const isChecked = !!checkedConcepts[conceptKey];
@@ -175,10 +172,10 @@ export const WeekCard: React.FC<WeekCardProps> = ({
                 <div
                   key={idx}
                   onClick={() => handleConceptClick(idx)}
-                  className={`p-3 rounded-xl border transition-all cursor-pointer select-none flex items-start gap-3 group ${
+                  className={`p-3.5 md:p-4 rounded-xl border transition-all cursor-pointer select-none flex items-start gap-3.5 group ${
                     isChecked
-                      ? "bg-emerald-50/50 border-emerald-300 text-slate-700 shadow-2xs"
-                      : "bg-slate-50 border-slate-200 hover:border-slate-400 hover:bg-slate-100/70 text-slate-900"
+                      ? "bg-emerald-50/40 border-emerald-300 text-slate-700 shadow-2xs"
+                      : "bg-slate-50/80 border-slate-200 hover:border-slate-400 hover:bg-slate-100/70 text-slate-900"
                   }`}
                 >
                   {/* Checkbox Icon */}
@@ -196,16 +193,27 @@ export const WeekCard: React.FC<WeekCardProps> = ({
                     </div>
                   </div>
 
-                  {/* Concept Text */}
-                  <span
-                    className={`text-xs md:text-sm leading-relaxed flex-1 ${
-                      isChecked
-                        ? "line-through text-slate-500 decoration-slate-400"
-                        : "text-slate-800 font-medium"
-                    }`}
-                  >
-                    {concept}
-                  </span>
+                  {/* Concept Title & Detailed Description */}
+                  <div className="flex-1 space-y-1">
+                    <h4
+                      className={`text-sm font-bold leading-snug ${
+                        isChecked
+                          ? "line-through text-slate-500 decoration-slate-400"
+                          : "text-slate-900 group-hover:text-blue-600 transition-colors"
+                      }`}
+                    >
+                      {concept.title}
+                    </h4>
+                    <p
+                      className={`text-xs md:text-sm leading-relaxed ${
+                        isChecked
+                          ? "text-slate-400"
+                          : "text-slate-600"
+                      }`}
+                    >
+                      {concept.description}
+                    </p>
+                  </div>
                 </div>
               );
             })}

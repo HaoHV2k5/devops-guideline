@@ -100,7 +100,10 @@ export const TimelineView: React.FC<TimelineViewProps> = ({
                         className="text-xs text-[#2c2c34] bg-[#f7f8fa] p-2.5 rounded-xl border border-[#eef0f3] flex items-start gap-2"
                       >
                         <span className="w-1.5 h-1.5 rounded-full bg-[#1c1c1e] shrink-0 mt-1.5" />
-                        <span>{concept}</span>
+                        <div>
+                          <strong className="block text-slate-900">{concept.title}</strong>
+                          <span className="text-slate-600 text-[11px] leading-relaxed">{concept.description}</span>
+                        </div>
                       </li>
                     ))}
                   </ul>

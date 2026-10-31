@@ -177,7 +177,7 @@ export const StickyNoteCard: React.FC<StickyNoteCardProps> = ({
                 className="text-xs text-[#2c2c34] flex items-start gap-1.5 leading-relaxed"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#1c1c1e] shrink-0 mt-1.5" />
-                <span className="line-clamp-2">{concept}</span>
+                <span className="line-clamp-2">{concept.title}</span>
               </li>
             ))}
           </ul>

@@ -1,3 +1,8 @@
+export interface CoreConcept {
+  title: string;
+  description: string;
+}
+
 export interface WeekTopic {
   id: number;
   weekNumber: number;
@@ -9,7 +14,7 @@ export interface WeekTopic {
   stickyColor: "yellow" | "teal" | "coral" | "rose" | "blue" | "orange";
   skills: string[];
   javaSpecificFocus: string;
-  coreConcepts: string[];
+  coreConcepts: CoreConcept[];
   breakAndDebug: {
     title: string;
     scenario: string;
@@ -90,17 +95,32 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     phaseId: 1,
     phaseName: "Nền tảng Hệ thống & Mạng",
     title: "Linux System Deep-Dive & Quản lý Process JVM",
-    tagline: "Từ sử dụng lệnh cơ bản sang thấu hiểu cựu thể Kernel, Systemd, Memory & Thread của Java",
+    tagline: "Từ sử dụng lệnh cơ bản sang thấu hiểu cặn kẽ Kernel, Systemd, Memory & Thread của Java",
     duration: "10-14 giờ (1.5-2h/ngày)",
     stickyColor: "yellow",
     skills: ["Linux FHS", "Systemd Units", "Process Management", "JVM Profiling", "htop", "jstack"],
     javaSpecificFocus: "Phân tích Thread Dump & Memory Usage của Java JVM bằng lệnh Linux nguyên bản mà không cần GUI.",
     coreConcepts: [
-      "Linux File System Hierarchy (FHS) & File Permissions (chmod, chown, SUID, SGID)",
-      "Systemd Architecture: Tạo custom `.service` file để auto-restart Spring Boot JAR khi server reboot",
-      "Process Lifecycle, Signals (SIGTERM vs SIGKILL, xử lý Graceful Shutdown trong Java)",
-      "Bộ nhớ Linux: Phân biệt `free`, `available`, `buff/cache` và hiện tượng Linux OOM Killer",
-      "JVM CLI tools trên server Linux: `jps`, `jstat -gc`, `jcmd`, `jstack`, `jmap`"
+      {
+        title: "Linux File Hierarchy (FHS) & Phân quyền User/Group",
+        description: "Nắm vững các thư mục quan trọng /etc (chứa cấu hình), /var/log (chứa log), /opt (chứa JAR app). Thực hành lệnh chmod 750/640, chown tạo user riêng devops/spring không có quyền root để chạy app an toàn."
+      },
+      {
+        title: "Systemd Service Unit cho Spring Boot",
+        description: "Tự viết file cấu hình /etc/systemd/system/myapp.service với các tham số ExecStart=java -jar ..., Restart=always, RestartSec=10s. Kích hoạt auto-restart cùng OS bằng systemctl enable --now và quản lý log qua journalctl."
+      },
+      {
+        title: "Vòng đời Process, Quản lý Thread & Signals",
+        description: "Hiểu cách Linux quản lý PID và LWP (Light Weight Process). Phân biệt signal SIGTERM (15) để ứng dụng giải phóng tài nguyên êm đẹp (Graceful Shutdown) và SIGKILL (9) ép tắt tiến trình."
+      },
+      {
+        title: "Bộ nhớ Linux: Free, Available & Page Cache",
+        description: "Đọc hiểu đúng đầu ra của lệnh free -h. Biết cách Linux Kernel tận dụng RAM rảnh làm Page Cache/Buffers và hiểu cơ chế Kernel kích hoạt OOM Killer khi thiếu hụt bộ nhớ."
+      },
+      {
+        title: "Bộ công cụ dòng lệnh chuẩn đoán JVM trên Linux",
+        description: "Thực hành sử dụng các công cụ đi kèm JDK: jps -l (tìm PID Java), jcmd <PID> VM.flags (xem flags runtime), jstack <PID> (xuất thread dump khi CPU spike), jstat -gc (soi Garbage Collection)."
+      }
     ],
     breakAndDebug: {
       title: "Chẩn đoán CPU Spike 100% của một Thread Java",
@@ -153,11 +173,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["TCP Handshake", "TIME_WAIT/CLOSE_WAIT", "DNS Resolution", "Nginx Config", "SSL/TLS", "Certbot"],
     javaSpecificFocus: "Cấu hình Forwarded Headers (`X-Forwarded-For`, `X-Forwarded-Proto`) để Spring Security và Servlet nhận đúng IP và giao thức thực của client.",
     coreConcepts: [
-      "TCP 3-way Handshake & 4-way Teardown: Thấu hiểu trạng thái TIME_WAIT và rò rỉ socket CLOSE_WAIT",
-      "DNS Resolution: Phân tích flow `/etc/hosts` → `/etc/resolv.conf` → DNS Cache → Recursive Resolver",
-      "HTTP/1.1 Keep-Alive, HTTP/2 Multiplexing & HTTP/3 QUIC",
-      "SSL/TLS Handshake: Certificate Authority, SNI, TLS Termination, tự động cấp chứng chỉ Let's Encrypt với Certbot",
-      "Nginx Architecture: Worker processes, non-blocking event-driven loop, Reverse Proxy, Upstream Load Balancing"
+      {
+        title: "TCP 3-way Handshake & 4-way Teardown",
+        description: "Nắm vững quy trình thiết lập kết nối TCP (SYN, SYN-ACK, ACK) và kết thúc (FIN, ACK). Phân biệt trạng thái TIME_WAIT (phía chủ động đóng) và hiện tượng rò rỉ socket CLOSE_WAIT do code Java không gọi close()."
+      },
+      {
+        title: "Cơ chế phân giải tên miền DNS & Caching",
+        description: "Nắm rõ chu trình phân giải từ /etc/hosts → Local DNS Cache → /etc/resolv.conf → Recursive DNS Resolver. Sử dụng lệnh dig +trace và nslookup để bắt lỗi khi không gọi được 3rd-party API."
+      },
+      {
+        title: "Giao thức HTTP/1.1 Keep-Alive, HTTP/2 & HTTP/3 QUIC",
+        description: "So sánh cơ chế Multiplexing trong HTTP/2 (giảm độ trễ nhiều requests qua 1 kết nối TCP duy nhất) và HTTP/3 qua giao thức UDP. Cấu hình Connection Pool cho HttpClient trong Spring Boot."
+      },
+      {
+        title: "Bảo mật SSL/TLS Handshake & Cấp chứng chỉ Certbot",
+        description: "Hiểu cách thức mã hóa bất đối xứng để trao đổi session key đối xứng. Tự động cấp và gia hạn chứng chỉ Let's Encrypt cho domain bằng công cụ certbot --nginx."
+      },
+      {
+        title: "Nginx Reverse Proxy, Load Balancing & Bảo vệ Tomcat",
+        description: "Thiết lập Nginx đứng trước Embedded Tomcat để TLS termination, chia tải Upstream (round-robin, ip_hash), cấu hình rate limiting, gzip nén dữ liệu và forward đúng header X-Forwarded-For."
+      }
     ],
     breakAndDebug: {
       title: "Xử lý lỗi 504 Gateway Timeout và rò rỉ kết nối CLOSE_WAIT",
@@ -208,11 +243,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["Docker Internals", "Namespaces & cgroups", "Multi-stage Build", "Eclipse Temurin JRE", "JVM cgroups v2", "Non-root User"],
     javaSpecificFocus: "Cấu hình `-XX:MaxRAMPercentage` và Container Awareness để JVM không bị Linux cgroup OOM Killer bắn hạ bất ngờ.",
     coreConcepts: [
-      "Bản chất Container: Linux Namespaces (PID, NET, MNT) và Control Groups (cgroups v1 vs v2 limit CPU/RAM)",
-      "Docker Image Layering, Copy-on-Write (OverlayFS) và tối ưu hóa Build Cache",
-      "Multi-stage Dockerfile: Tách biệt build stage (Maven/Gradle + JDK) và runtime stage (JRE Minimal / Distroless)",
-      "JVM Memory trong container: Heap, Metaspace, Native Threads và cgroups limit",
-      "Bảo mật Container: Chạy với Non-root user (`USER spring:spring`), loại bỏ shell và curl trong production image"
+      {
+        title: "Bản chất Container: Linux Namespaces & cgroups v2",
+        description: "Thấu hiểu container không phải là máy ảo mà là tiến trình Linux bị cô lập bằng Namespaces (PID, NET, MNT) và bị giới hạn tài nguyên bởi Control Groups (cgroups limit CPU, RAM)."
+      },
+      {
+        title: "Cơ chế Image Layering, Build Cache & OverlayFS",
+        description: "Hiểu nguyên lý xếp chồng layer và tính chất Copy-on-Write. Sắp xếp thứ tự các lệnh trong Dockerfile sao cho tầng ít thay đổi (dependencies) đứng trước để tận dụng tối đa cache."
+      },
+      {
+        title: "Multi-stage Dockerfile tối ưu kích thước image",
+        description: "Tách biệt 2 stage: Stage build dùng Maven/Gradle với OpenJDK để compile code, Stage runtime dùng JRE Distroless hoặc Eclipse Temurin Alpine chỉ ~150MB, loại bỏ hoàn toàn compiler thừa."
+      },
+      {
+        title: "JVM Container Awareness & Bộ nhớ trong Container",
+        description: "Cấu hình -XX:MaxRAMPercentage=75.0 để JVM đọc đúng dung lượng RAM giới hạn từ cgroups, chừa 25% cho native memory, thread stacks và OS buffers, tránh bị Linux OOM Killer bắn hạ (Exit 137)."
+      },
+      {
+        title: "Bảo mật Container: Chạy với Non-root User",
+        description: "Khai báo user không đặc quyền USER 1001:1001 trong Dockerfile. Không chạy container với quyền root, loại bỏ shell và các tiện ích nhạy cảm như curl, wget trong production image."
+      }
     ],
     breakAndDebug: {
       title: "Hiện tượng JVM bị OOM Killer (Exit 137) dù chưa hề đạt Java OutOfMemoryError",
@@ -263,11 +313,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["Docker Compose v2", "Bridge Networks", "Named Volumes", "Healthcheck Dependency", "Kafka & Zookeeper/KRaft"],
     javaSpecificFocus: "Cấu hình dynamic environment variables và healthcheck `condition: service_healthy` để Spring Boot không crash khi chờ Postgres/Kafka sẵn sàng.",
     coreConcepts: [
-      "Docker Compose Spec: Quản lý hạ tầng multi-container bằng file khai báo YAML duy nhất",
-      "Docker Network Drivers: Default bridge vs User-defined custom bridge (tự động phân giải DNS nội bộ theo tên service)",
-      "Dữ liệu bền vững: Phân biệt Bind Mount (mount thư mục host) và Named Volumes (do Docker daemon quản lý)",
-      "Giải quyết bài toán phụ thuộc khởi động: `depends_on` với `condition: service_healthy` thay vì phụ thuộc đơn thuần",
-      "Tích hợp cụm: Spring Boot App + PostgreSQL + Redis Cache + Apache Kafka (KRaft mode) + Kafdrop UI"
+      {
+        title: "Docker Compose v2: Khai báo hạ tầng dịch vụ đồng nhất",
+        description: "Viết file docker-compose.yml chuẩn hóa định nghĩa toàn bộ cụm dịch vụ Backend, Database, Cache và Message Queue chạy đồng bộ chỉ bằng 1 câu lệnh docker compose up -d."
+      },
+      {
+        title: "Mạng nội bộ User-defined Bridge & Phân giải DNS tự động",
+        description: "Hiểu cách Docker Compose tạo mạng bridge riêng và tự động phân giải tên service (như postgres, redis, kafka) thành IP nội bộ, loại bỏ việc hardcode IP hay dùng localhost."
+      },
+      {
+        title: "Lưu trữ dữ liệu bền vững: Bind Mounts vs Named Volumes",
+        description: "Phân biệt Bind Mount (mount thư mục trên máy host, phù hợp dev) và Named Volume (do Docker engine quản lý, tối ưu I/O, dùng cho database production để không mất dữ liệu khi xóa container)."
+      },
+      {
+        title: "Kiểm soát thứ tự khởi động với Service Healthcheck",
+        description: "Giải quyết bài toán Spring Boot crash do DB chưa sẵn sàng bằng cách khai báo healthcheck với pg_isready trong PostgreSQL và depends_on: { postgres: { condition: service_healthy } }."
+      },
+      {
+        title: "Tích hợp cụm Full-stack: Spring Boot + Postgres + Redis + Kafka",
+        description: "Cấu hình tích hợp môi trường hoàn chỉnh gồm Spring Boot REST API, cơ sở dữ liệu PostgreSQL, Redis làm distributed cache, và cụm Apache Kafka (chạy chế độ KRaft không cần Zookeeper) kèm giao diện Kafdrop."
+      }
     ],
     breakAndDebug: {
       title: "Spring Boot crash vòng lặp do PostgreSQL chưa kịp mở port kết nối",
@@ -318,11 +383,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["GitHub Actions", "Workflows & Jobs", "Matrix Builds", "Dependency Caching", "Docker Buildx", "GHCR Registry"],
     javaSpecificFocus: "Cấu hình cache thư mục `.m2` hoặc Gradle wrapper để rút ngắn thời gian pipeline từ 8 phút xuống dưới 1 phút.",
     coreConcepts: [
-      "Cấu trúc GitHub Actions: Events, Workflows, Jobs, Steps, Actions và Runners",
-      "Khai báo Pipeline `.github/workflows/ci.yml`: Chạy tự động khi có Pull Request vào nhánh `main`",
-      "Tối ưu tốc độ CI: `actions/cache` cho Maven dependencies và Docker Buildx layer caching (`cache-from=gha`)",
-      "Automated Quality Gates: Chạy JUnit 5 tests, Testcontainers cho integration test, xuất JaCoCo coverage",
-      "Security & Artifacts: Quét bí mật rò rỉ (TruffleHog), build multi-arch image (amd64/arm64) và push vào GHCR"
+      {
+        title: "Kiến trúc GitHub Actions: Workflows, Jobs, Steps & Runners",
+        description: "Hiểu cách thức hoạt động của runner (máy ảo Linux tạm thời), cấu trúc file YAML .github/workflows/ci.yml, các sự kiện trigger (push, pull_request) và cơ chế phân nhánh jobs."
+      },
+      {
+        title: "Tối ưu hóa tốc độ build bằng Dependency & Layer Caching",
+        description: "Cấu hình actions/cache lưu trữ thư mục ~/.m2 hoặc Gradle cache và sử dụng Docker Buildx GitHub cache (type=gha) để rút ngắn thời gian pipeline từ 8 phút xuống còn dưới 60 giây."
+      },
+      {
+        title: "Automated Quality Gate: Unit Test, Testcontainers & JaCoCo",
+        description: "Tự động chạy bộ test JUnit 5, tích hợp Testcontainers để test database thực tế trong pipeline, xuất báo cáo độ phủ mã nguồn JaCoCo và chặn merge PR nếu test thất bại hoặc code coverage < 80%."
+      },
+      {
+        title: "Quét chất lượng mã nguồn & Lỗ hổng bảo mật tự động",
+        description: "Tích hợp SonarCloud/SonarQube để phát hiện code smells, bug tiềm ẩn và lỗ hổng bảo mật. Sử dụng Trivy quét dependency Maven để phát hiện các CVE nghiêm trọng trước khi build image."
+      },
+      {
+        title: "Đóng gói Docker Multi-arch & Đẩy lên GitHub Container Registry (GHCR)",
+        description: "Sử dụng docker/build-push-action build image hỗ trợ cả kiến trúc linux/amd64 và linux/arm64, gán tag theo Git Commit SHA và push an toàn lên GHCR bằng GITHUB_TOKEN."
+      }
     ],
     breakAndDebug: {
       title: "Pipeline bị nghẽn 15 phút và push Docker image bị lỗi 403 Forbidden",
@@ -373,11 +453,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["AWS VPC & Subnets", "Security Groups", "RDS PostgreSQL", "Terraform HCL", "State Management", "S3 Backend"],
     javaSpecificFocus: "Thiết kế topology mạng chuẩn: Spring Boot backend và PostgreSQL RDS bắt buộc nằm trong Private Subnet không có IP public.",
     coreConcepts: [
-      "Kiến trúc Cloud VPC chuẩn: Public Subnet (NAT Gateway, ALB) vs Private Subnet (Backend EC2, RDS Database)",
-      "An toàn mạng: Phân biệt Security Groups (Stateful, áp dụng cấp Instance) và Network ACLs (Stateless, cấp Subnet)",
-      "Terraform Core Concepts: Providers, Resources, Variables, Outputs, Data Sources và State",
-      "State Management an toàn: Lưu `terraform.tfstate` trên AWS S3 Bucket với State Locking bằng DynamoDB",
-      "Quy trình Terraform an toàn: `terraform plan` kiểm tra trước mọi thay đổi trước khi chạy `terraform apply`"
+      {
+        title: "Thiết kế kiến trúc Cloud VPC & Phân vùng Subnets chuẩn",
+        description: "Thiết kế mạng ảo VPC trên AWS chia thành Public Subnet (chứa NAT Gateway, Application Load Balancer) và Private Subnet cô lập (chứa máy chủ EC2 backend và cơ sở dữ liệu RDS)."
+      },
+      {
+        title: "Bảo mật mạng nhiều lớp: Security Groups vs Network ACLs",
+        description: "Phân biệt Security Group hoạt động ở tầng instance (Stateful - tự cho phép phản hồi) và NACL hoạt động ở tầng subnet (Stateless - phải mở cả 2 chiều). Cấu hình chỉ cho phép EC2 gọi port 5432 của RDS."
+      },
+      {
+        title: "Ngôn ngữ HCL của Terraform: Providers, Resources & Variables",
+        description: "Khai báo hạ tầng bằng code thay vì bấm tay trên AWS Console. Nắm vững cú pháp HCL, cách truyền biến qua variables.tf, xuất giá trị qua outputs.tf và quản lý dependencies giữa các tài nguyên."
+      },
+      {
+        title: "Quản lý State an toàn: S3 Remote Backend & DynamoDB Locking",
+        description: "Lưu file terraform.tfstate tập trung trên AWS S3 Bucket (mã hóa at-rest) kết hợp bảng DynamoDB để khóa state (State Locking), ngăn chặn xung đột dữ liệu khi nhiều kỹ sư cùng chạy apply."
+      },
+      {
+        title: "Quy trình vận hành Terraform an toàn: Plan & Apply",
+        description: "Luôn chạy terraform plan -out=tfplan để rà soát chi tiết mọi tài nguyên sắp được tạo/sửa/xóa trước khi áp dụng thực tế, sử dụng terraform fmt và tflint để chuẩn hóa code."
+      }
     ],
     breakAndDebug: {
       title: "Ứng dụng không thể kết nối tới RDS do cấu hình Security Group và Route Table sai",
@@ -429,11 +524,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["K8s Architecture", "etcd & kube-apiserver", "Pods & ReplicaSets", "Rolling Updates", "ClusterIP / NodePort", "CoreDNS"],
     javaSpecificFocus: "Quản lý vòng đời Pod khi triển khai Spring Boot để không làm gián đoạn request của khách hàng khi release phiên bản mới.",
     coreConcepts: [
-      "Kiến trúc Kubernetes: Control Plane (API Server, etcd, Scheduler, Controller Manager) vs Worker Node (Kubelet, Kube-proxy, Containerd)",
-      "Nguyên lý Reconcile Loop: Trạng thái mong muốn (Desired State trong YAML) vs Trạng thái thực tế (Actual State)",
-      "Pod Lifecycle: Pending → Running → Succeeded/Failed, CrashLoopBackOff và ImagePullBackOff",
-      "Deployment Controller: Quản lý ReplicaSet và chiến lược Rolling Update (`maxSurge` và `maxUnavailable`)",
-      "Kubernetes Services: Cơ chế ClusterIP, NodePort, LoadBalancer và cách CoreDNS phân giải service name"
+      {
+        title: "Kiến trúc K8s: Control Plane vs Worker Nodes",
+        description: "Nắm vững nhiệm vụ của các thành phần Control Plane (API Server, cơ sở dữ liệu etcd, Scheduler, Controller Manager) và Worker Node (Kubelet quản lý Pod, Kube-proxy định tuyến mạng, Containerd runtime)."
+      },
+      {
+        title: "Nguyên lý Vòng lặp hòa giải (Reconciliation Loop)",
+        description: "Hiểu cốt lõi triết lý Kubernetes: So sánh liên tục giữa Trạng thái mong muốn (Desired State khai báo trong file YAML) và Trạng thái thực tế (Actual State trên cụm máy chủ) để tự động sửa đổi."
+      },
+      {
+        title: "Vòng đời Pod & Các trạng thái sự cố kinh điển",
+        description: "Nắm rõ chu trình sống của Pod từ Pending → Running → Succeeded/Failed. Phân tích bản chất nguyên nhân khi Pod bị rơi vào CrashLoopBackOff hoặc ImagePullBackOff."
+      },
+      {
+        title: "Deployment Controller & Chiến lược Rolling Update",
+        description: "Quản lý ReplicaSet để đảm bảo số lượng bản sao mong muốn. Cấu hình chiến lược cập nhật cuốn chiếu Rolling Update (maxSurge, maxUnavailable) để deploy phiên bản mới không gián đoạn dịch vụ."
+      },
+      {
+        title: "Kubernetes Services & Phân giải tên miền CoreDNS",
+        description: "Bản chất Service: Cung cấp IP ảo ổn định (ClusterIP, NodePort, LoadBalancer) đại diện cho một nhóm Pod thay đổi liên tục. Cơ chế CoreDNS nội bộ tự động phân giải servicename.namespace.svc.cluster.local."
+      }
     ],
     breakAndDebug: {
       title: "Giải cứu Pod bị kẹt `CrashLoopBackOff` và `ImagePullBackOff`",
@@ -485,11 +595,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["ConfigMaps & Secrets", "PVC & StorageClass", "Startup/Liveness/Readiness", "Resource Requests/Limits", "Actuator Probes"],
     javaSpecificFocus: "Cấu hình chính xác StartupProbe và LivenessProbe dựa trên Spring Boot Actuator (`/actuator/health/liveness`) tránh việc Kubelet giết Pod khi Spring context đang khởi tạo.",
     coreConcepts: [
-      "Quản lý cấu hình tách biệt: ConfigMap (plain text) và Secret (base64 mã hóa/bảo vệ tại rest) mount vào Pod",
-      "Persistent Storage: PersistentVolume (PV), PersistentVolumeClaim (PVC) và Dynamic Provisioning với StorageClass",
-      "Bộ 3 Healthcheck Probes: `startupProbe` (bảo vệ ứng dụng khởi động chậm), `livenessProbe` (phát hiện deadlock) và `readinessProbe` (sẵn sàng nhận traffic)",
-      "Spring Boot 3 Actuator Probes: Tự động publish endpoint `/actuator/health/liveness` và `/readiness`",
-      "Resource Management: `requests` (để Scheduler xếp chỗ) và `limits` (ngăn chặn noisy neighbor, CPU throttling và OOMKilled)"
+      {
+        title: "Tách biệt cấu hình: ConfigMap & Secret",
+        description: "Quản lý tham số môi trường và mật khẩu độc lập với container image. Mount ConfigMap và Secret dưới dạng biến môi trường (envFrom) hoặc file cấu hình mount vào thư mục (volumeMounts)."
+      },
+      {
+        title: "Lưu trữ dữ liệu bền vững: PV, PVC & StorageClass",
+        description: "Hiểu cách thức trừu tượng hóa ổ cứng lưu trữ trong K8s: PersistentVolume (ổ cứng do admin cấp), PersistentVolumeClaim (yêu cầu cấp phát của ứng dụng) và Dynamic Provisioning tự động tạo volume qua StorageClass."
+      },
+      {
+        title: "Bộ 3 Healthcheck Probes: Startup, Liveness & Readiness",
+        description: "Tích hợp Spring Boot Actuator (/actuator/health/liveness và /readiness). Cấu hình startupProbe bảo vệ ứng dụng Java khởi động chậm, livenessProbe khởi động lại Pod khi deadlock, readinessProbe tạm gỡ traffic khi app bận."
+      },
+      {
+        title: "Phân bổ tài nguyên: Resource Requests & Limits",
+        description: "Khai báo requests để K8s Scheduler tìm node có đủ CPU/RAM và limits để chặn app ngốn tài nguyên vượt mức. Hiểu hiện tượng CPU Throttling và Linux OOMKilled exit code 137 khi vượt RAM limit."
+      },
+      {
+        title: "Phân loại chất lượng dịch vụ: Kubernetes QoS Classes",
+        description: "Phân biệt 3 nhóm QoS: Guaranteed (request = limit), Burstable (request < limit) và BestEffort (không khai báo). Hiểu thứ tự ưu tiên mà Kubelet chọn để trục xuất (evict) Pod khi node cạn kiệt tài nguyên."
+      }
     ],
     breakAndDebug: {
       title: "Kubelet liên tục giết Pod Spring Boot vì cấu hình Liveness Probe quá hấp tấp",
@@ -540,11 +665,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["Helm Charts", "Values.yaml", "Chart Templating", "GitOps Principles", "ArgoCD", "Self-Healing"],
     javaSpecificFocus: "Tạo 1 Generic Helm Chart dùng chung cho toàn bộ các microservices Java Spring Boot trong công ty.",
     coreConcepts: [
-      "Vấn đề YAML Hell: Tại sao copy-paste hàng trăm file YAML thủ công gây lỗi khi triển khai đa môi trường (Dev/Staging/Prod)",
-      "Helm Package Manager: Chart structure, `Chart.yaml`, `values.yaml`, templates và built-in objects (`.Values`, `.Release`)",
-      "Helm Lifecycle: `helm install`, `upgrade`, `rollback` và kiểm tra template bằng `helm template`",
-      "GitOps Core Philosophy: Git là Single Source of Truth duy nhất cho toàn bộ trạng thái hệ thống",
-      "ArgoCD Architecture: Pull-based model, Application CRD, Auto-sync, OutOfSync detection và Self-healing"
+      {
+        title: "Giải quyết vấn đề YAML Hell bằng Helm Package Manager",
+        description: "Hiểu tại sao copy-paste file YAML thủ công gây lỗi khi triển khai đa môi trường. Nắm cấu trúc Helm Chart (Chart.yaml, values.yaml, templates) và các biến built-in .Values, .Release."
+      },
+      {
+        title: "Tạo Generic Helm Chart dùng chung cho Microservices Spring Boot",
+        description: "Xây dựng 1 Chart mẫu chuẩn hóa cho công ty: Định nghĩa Deployment, Service, Ingress, HPA và Actuator Probes, chỉ cần ghi đè file values-dev.yaml và values-prod.yaml cho từng service."
+      },
+      {
+        title: "Kiểm thử & Vòng đời bản phát hành Helm",
+        description: "Sử dụng helm template và helm lint để kiểm tra cú pháp YAML đã render trước khi triển khai. Nắm vững lệnh helm upgrade --install và rollback tức thì bằng helm rollback <release> <revision>."
+      },
+      {
+        title: "Triết lý GitOps: Git là Single Source of Truth duy nhất",
+        description: "Toàn bộ trạng thái hạ tầng được khai báo và lưu trữ trên Git repository. Mọi thay đổi trên cluster bắt buộc phải thông qua Git Commit và Pull Request để có lịch sử audit log minh bạch 100%."
+      },
+      {
+        title: "Kiến trúc ArgoCD: Tự động đồng bộ & Cơ chế Self-Healing",
+        description: "Cài đặt ArgoCD trên cluster theo mô hình Pull-based an toàn. Khai báo đối tượng Application CRD, cấu hình Auto-sync và bật selfHeal: true để tự động đè lại cấu hình nếu có ai sửa bằng tay trên cluster."
+      }
     ],
     breakAndDebug: {
       title: "Chạy đua sửa đổi thủ công và chứng kiến cơ chế Self-Healing của ArgoCD",
@@ -595,11 +735,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["Prometheus", "PromQL", "Grafana Dashboards", "Spring Micrometer", "Grafana Loki", "Alertmanager"],
     javaSpecificFocus: "Cấu hình Spring Boot Actuator kết hợp Micrometer để xuất các chỉ số JVM (GC pause time, Heap usage, HikariCP pool) và HTTP request latency.",
     coreConcepts: [
-      "3 trụ cột Observability: Metrics (đo lường), Logs (sự kiện) và Traces (hành trình request)",
-      "Spring Boot 3 + Micrometer: Cung cấp metrics chuẩn format Prometheus tại `/actuator/prometheus`",
-      "Prometheus Architecture: Pull model, Time Series Database (TSDB), Scrape targets và PromQL cơ bản",
-      "PromQL thực chiến: Tính tỷ lệ request (`rate`), đếm status 5xx, và tính phân vị P95/P99 latency (`histogram_quantile`)",
-      "Centralized Logging: Thu thập log container bằng Promtail/FluentBit, lưu trữ trên Grafana Loki và hiển thị trên Grafana"
+      {
+        title: "3 Trụ cột Observability: Metrics, Centralized Logs & Traces",
+        description: "Hiểu vai trò từng trụ cột: Metrics trả lời 'hệ thống đang gặp vấn đề ở đâu?', Logs cho biết 'chi tiết sự cố là gì?', và Distributed Traces giúp 'lần theo hành trình request qua các microservices'."
+      },
+      {
+        title: "Spring Boot Actuator kết hợp Micrometer xuất Metrics chuẩn",
+        description: "Bật endpoint /actuator/prometheus trong Spring Boot. Thu thập các chỉ số quan trọng: JVM memory (heap/non-heap), Garbage Collection pause times, HikariCP connection pool, và HTTP request count/latency."
+      },
+      {
+        title: "Prometheus Architecture: Mô hình Pull, TSDB & Scrape Configs",
+        description: "Hiểu lý do Prometheus chọn mô hình Pull để kiểm soát tải không bị DDoS. Cấu hình scrape_configs hoặc Prometheus Operator ServiceMonitor để tự động phát hiện các Pod backend mới tạo."
+      },
+      {
+        title: "Truy vấn PromQL thực chiến: Rate, Sum & Phân vị P95/P99",
+        description: "Viết câu lệnh PromQL tính số request lỗi 5xx trên giây (sum(rate(...[5m]))), và tính thời gian phản hồi ở phân vị P95/P99 bằng histogram_quantile thay vì dùng thời gian trung bình sai lệch."
+      },
+      {
+        title: "Centralized Logging với Grafana Loki & Thiết lập Alerts",
+        description: "Gom log từ container bằng Promtail/FluentBit đẩy về Loki, xem log trực tiếp trên Grafana bằng cú pháp LogQL. Thiết lập Alertmanager gửi thông báo khẩn cấp về Slack/Telegram khi hệ thống có lỗi đột biến."
+      }
     ],
     breakAndDebug: {
       title: "Phát hiện nghẽn HikariCP Connection Pool và Alert khi tỷ lệ lỗi 5xx tăng vọt",
@@ -651,11 +806,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["Trivy Vulnerability Scan", "SAST / SonarQube", "K8s NetworkPolicies", "PodSecurityAdmission", "External Secrets Operator", "Least Privilege"],
     javaSpecificFocus: "Quét lỗ hổng thư viện Java (CVE trong Maven dependencies) và cô lập database port chỉ cho phép Pod backend kết nối qua NetworkPolicy.",
     coreConcepts: [
-      "Triết lý Shift-Left Security: Phát hiện và ngăn chặn lỗ hổng từ code và build time thay vì đợi lên Production",
-      "Quét lỗ hổng tự động: Dùng Trivy để scan CVE trong Docker Image và phụ thuộc Maven trong CI pipeline",
-      "Kubernetes Security Hardening: Chạy container với `readOnlyRootFilesystem: true`, `runAsNonRoot: true`, `drop: ['ALL']`",
-      "NetworkPolicies: Thiết lập tường lửa bên trong cluster, cô lập namespace và chỉ mở traffic cần thiết giữa các pods",
-      "Quản lý Secret chuẩn doanh nghiệp: Tích hợp AWS Secrets Manager / HashiCorp Vault vào Kubernetes qua External Secrets Operator"
+      {
+        title: "Triết lý Shift-Left Security trong vòng đời phần mềm",
+        description: "Đưa các bước kiểm tra an ninh vào giai đoạn sớm nhất của chu trình phát triển (lúc viết code và build time trong CI) thay vì đợi ứng dụng chạy trên Production mới phát hiện lỗ hổng."
+      },
+      {
+        title: "Quét lỗ hổng tự động với Trivy trong CI Pipeline",
+        description: "Tích hợp Trivy quét các CVE trong base image hệ điều hành và thư viện phụ thuộc Maven/Gradle. Cấu hình tự động dừng pipeline nếu phát hiện lỗ hổng mức độ HIGH hoặc CRITICAL."
+      },
+      {
+        title: "Kubernetes Security Hardening & Pod Security Standards",
+        description: "Thiết lập securityContext cho container: readOnlyRootFilesystem: true (ngăn ghi file trái phép), runAsNonRoot: true, allowPrivilegeEscalation: false và drop toàn bộ Linux capabilities không cần thiết."
+      },
+      {
+        title: "Tường lửa mạng nội bộ với K8s NetworkPolicies",
+        description: "Thay thế mô hình mạng phẳng mặc định bằng việc áp dụng NetworkPolicy với chính sách Default Deny Ingress. Chỉ cho phép Pod Backend kết nối vào port 5432 của Pod Database PostgreSQL."
+      },
+      {
+        title: "Quản lý bí mật an toàn với External Secrets Operator & Vault",
+        description: "Không bao giờ lưu secret mã hóa base64 trên Git. Sử dụng External Secrets Operator để tự động kéo secret từ AWS Secrets Manager hoặc HashiCorp Vault đồng bộ thành K8s Secret an toàn."
+      }
     ],
     breakAndDebug: {
       title: "Chặn đứng tấn công leo thang đặc quyền và quét sạch CVE nghiêm trọng",
@@ -706,11 +876,26 @@ export const ROADMAP_WEEKS: WeekTopic[] = [
     skills: ["Capstone Architecture", "HPA Auto-scaling", "Zero-downtime Rollout", "Graceful Shutdown", "Chaos Testing", "System Interview"],
     javaSpecificFocus: "Cấu hình `server.shutdown=graceful` trong `application.yml` kết hợp `terminationGracePeriodSeconds` để không làm drop bất kỳ HTTP request nào khi K8s scale down Pod.",
     coreConcepts: [
-      "Kiến trúc Tổng thể Capstone: Client → Cloudflare → Nginx Ingress → Spring Boot App (HPA) → PostgreSQL + Redis + Kafka",
-      "Horizontal Pod Autoscaler (HPA): Tự động scale từ 2 lên 10 pods khi CPU > 70% hoặc Memory > 80%",
-      "Bí quyết Zero-Downtime Deployment: Phối hợp giữa K8s Endpoints, PreStop Hook và Spring Boot Graceful Shutdown",
-      "Kiểm thử tải & Chaos Engineering: Dùng k6 bắn tải 1000 req/s đồng thời tiến hành deploy version mới",
-      "Tổng hợp 20 kịch bản phỏng vấn 'Tại sao?': Diễn tập trả lời lưu loát từ kiến trúc đến câu chuyện debug thực tế"
+      {
+        title: "Kiến trúc Tổng thể Capstone Microservices Production",
+        description: "Hoàn thiện kiến trúc khép kín: Client → Cloudflare DNS/WAF → Nginx Ingress Controller (TLS termination) → Spring Boot REST API (scale HPA) → PostgreSQL + Redis Cache + Apache Kafka."
+      },
+      {
+        title: "Horizontal Pod Autoscaler (HPA) theo CPU, Memory & Custom Metrics",
+        description: "Cài đặt K8s Metrics Server và cấu hình HPA tự động tăng giảm số lượng replica (từ 2 đến 10 Pods) dựa trên ngưỡng CPU (> 70%) hoặc lưu lượng request HTTP thực tế."
+      },
+      {
+        title: "Bí quyết Zero-Downtime Deployment & Graceful Shutdown",
+        description: "Phối hợp nhịp nhàng giữa Kubernetes Endpoints, preStop hook (sleep 5) và cấu hình server.shutdown=graceful trong Spring Boot để đảm bảo 0% request bị drop khi Rolling Update."
+      },
+      {
+        title: "Kiểm thử tải & Diễn tập sự cố (Chaos Engineering)",
+        description: "Dùng k6 bắn tải 1000 req/s đồng thời tiến hành deploy phiên bản mới để kiểm tra độ ổn định. Tự tay xóa ngẫu nhiên 1 Pod hoặc giả lập mất mạng database để kiểm tra khả năng tự phục hồi."
+      },
+      {
+        title: "Tổng hợp 20 kịch bản phỏng vấn 'Tại sao?' & Báo cáo đồ án",
+        description: "Ôn tập toàn diện bộ câu hỏi giải thích cơ chế sâu, tự nói thành lời trôi chảy từ kiến trúc hệ thống, quy trình CI/CD đến kinh nghiệm debug các lỗi production thực tế để tự tin chinh phục nhà tuyển dụng."
+      }
     ],
     breakAndDebug: {
       title: "Khắc phục lỗi 502 Bad Gateway ngắt quãng xảy ra trong quá trình Rolling Update",
